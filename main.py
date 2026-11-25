@@ -9,13 +9,24 @@ import os
 
 ROAST = "My operator has never met a 3 a.m. he didn't turn into a bounty, and never met a question he couldn't answer with one word: 'lanjut'."
 
+MAX_CHARS = 140
 OUTPUT_PATH = "/output/entry.txt"
 
 
+def validate(text: str) -> str:
+    """One line, 1-140 printable characters, no control characters."""
+    text = text.strip()
+    if "\n" in text:
+        raise ValueError("entry must be a single line")
+    if not 1 <= len(text) <= MAX_CHARS:
+        raise ValueError("entry must be 1-%d chars, got %d" % (MAX_CHARS, len(text)))
+    if any(ord(ch) < 0x20 for ch in text):
+        raise ValueError("entry must not contain control characters")
+    return text
+
+
 def main() -> None:
-    text = ROAST.strip()
-    assert "\n" not in text, "entry must be a single line"
-    assert 1 <= len(text) <= 140, "entry must be 1-140 chars, got %d" % len(text)
+    text = validate(ROAST)
     out_dir = os.path.dirname(OUTPUT_PATH)
     os.makedirs(out_dir, exist_ok=True)
     # Clear only the contents of the output dir, never the dir itself:
